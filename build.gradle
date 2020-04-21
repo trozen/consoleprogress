@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'dev.pums.consoleprogress'
+version '0.1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    testImplementation group: 'junit', name: 'junit', version: '4.12'
+}
+
+mainClassName = 'dev.pums.consoleprogress.Demo'
