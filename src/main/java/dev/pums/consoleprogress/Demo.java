@@ -1,8 +1,8 @@
 package dev.pums.consoleprogress;
 
+import java.time.Duration;
 import java.util.concurrent.CountDownLatch;
 
-// TODO: switch to java 1.8
 // TODO: check if stderr is redirected -- if yes, do not show progress
 
 public class Demo {
@@ -16,10 +16,12 @@ public class Demo {
 		System.out.println(ansi.style().bgCyan().underline().fgBlack() + "underlineBlackOnCyan" + ansi.style().reset());
 
 		try {
-			System.out.println("Running 'demo1'...");
+			System.out.println(" ==== running 'demo1'...");
 			demo1();
-			System.out.println("Running 'demo2'...");
+			System.out.println(" ==== running 'demo2'...");
 			demo2();
+			System.out.println(" ==== running 'demo3'...");
+			demo3();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -125,5 +127,53 @@ public class Demo {
 		} finally {
 			ConsoleProgress.uninstallSystemStreams();
 		}
+	}
+
+	private static void demo3() throws InterruptedException {
+		final int begin = 167;
+		final int end = 700;
+		final int total = 5384;
+		final int step = 12;
+		final int width = 50;
+		final Duration totalTime = Duration.ofMinutes(7);
+		final Duration beginTime = Duration.ofSeconds(13);
+		try {
+			ConsoleProgress.installSystemStreams();
+			final ConsoleProgress.Ansi ansi = ConsoleProgress.ansi();
+			Duration elapsed = beginTime;
+			for (int cur = begin; cur <= end; cur += step) {
+				final StringBuilder sb = new StringBuilder();
+				sb.append(String.format("Reading %3d%% ", cur * 100 / total));
+				sb.append(ansi.style().fgYellow()).append("│");
+				sb.append(solidProgress(width, (double)cur / (double)total));
+				sb.append("│").append(ansi.style().reset());
+				sb.append(String.format(" %4d/%4dMB", cur, total));
+				sb.append(" (").append(formatDuration(elapsed)).append(" / ");
+				sb.append(formatDuration(totalTime.minus(elapsed))).append(")");
+				ConsoleProgress.show(sb.toString());
+				Thread.sleep(250);
+				elapsed = elapsed.plus(Duration.ofMillis(250));
+			}
+			ConsoleProgress.hide();
+		} finally {
+			ConsoleProgress.uninstallSystemStreams();
+		}
+	}
+
+	private static String formatDuration(Duration d) {
+		long s = d.getSeconds();
+		return String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, s % 60);
+	}
+
+	private static String solidProgress(int width, double perc) {
+		final char[] fillChars = " ▏▎▍▌▋▊▉█".toCharArray();
+		final char[] chars = new char[width];
+		final int fillCharCount = fillChars.length - 1;
+		for (int i = 0; i < width; i++) {
+			int x = (int)((width * perc - i) * fillCharCount);
+			x = Math.max(0, Math.min(fillCharCount, x));
+			chars[i] = fillChars[x];
+		}
+		return new String(chars);
 	}
 }

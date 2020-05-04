@@ -84,7 +84,6 @@ public class ConsoleProgress {
 			if (!consoleOutput) {
 				return;
 			}
-			// TODO: calculate length including control sequences
 			int previousLength = 0;
 			if (currentProgress != null) {
 				previousLength = currentProgress.length();
